@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.util.List;
+
 @MockitoSettings
 public class TripServiceTest implements WithAssertions {
 
@@ -37,10 +39,9 @@ public class TripServiceTest implements WithAssertions {
     }
 
     @Test
-    @DisplayName("Should not throw exception when user is available")
-    public void DontThrowWhenLoggedInUserAvailable() {
+    @DisplayName("If trip owner has no friends, returns empty trip list")
+    public void emptyTripList() {
         // given
-        // mocked user session without logged in user
         User loggedUser = new User();
         BDDMockito
                 .given(mockUserSession.getLoggedUser())
@@ -49,9 +50,10 @@ public class TripServiceTest implements WithAssertions {
         // and
         User tripOwner = new User();
 
-        // expect
-        Assertions.assertDoesNotThrow(() -> tripService.getTripsByUser(tripOwner));
+        // when
+        List<Trip> trips = tripService.getTripsByUser(tripOwner);
+
+        //then
+        assertThat(trips).isEmpty();
     }
-
-
 }
