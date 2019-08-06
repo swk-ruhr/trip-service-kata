@@ -5,7 +5,9 @@ import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
 import org.craftedsw.tripservicekata.user.UserSession;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
@@ -38,22 +40,47 @@ public class TripServiceTest implements WithAssertions {
         Assertions.assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(tripOwner));
     }
 
-    @Test
-    @DisplayName("If trip owner has no friends, returns empty trip list")
-    public void emptyTripList() {
-        // given
-        User loggedUser = new User();
-        BDDMockito
-                .given(mockUserSession.getLoggedUser())
-                .willReturn(loggedUser);
+    @Nested
+    class WithLoggedInUser {
 
-        // and
-        User tripOwner = new User();
+        private User loggedUser;
 
-        // when
-        List<Trip> trips = tripService.getTripsByUser(tripOwner);
+        @BeforeEach
+        void setUp() {
+            loggedUser = new User();
+            BDDMockito
+                    .given(mockUserSession.getLoggedUser())
+                    .willReturn(loggedUser);
+        }
 
-        //then
-        assertThat(trips).isEmpty();
+        @Test
+        @DisplayName("If trip owner has no friends, returns empty trip list")
+        public void emptyTripList() {
+            // given
+            User tripOwner = new User();
+
+            // when
+            List<Trip> trips = tripService.getTripsByUser(tripOwner);
+
+            //then
+            assertThat(trips).isEmpty();
+        }
+
+        @Test
+        @DisplayName("If trip owner is no friend of logged user, returns empty trip list")
+        public void tripListEmptyIfUserNoFriendOfOwner() {
+            // given
+            User tripOwner = new User();
+
+            // and
+            User tripOwnerFriend = new User();
+            tripOwner.addFriend(tripOwnerFriend);
+
+            // when
+            List<Trip> trips = tripService.getTripsByUser(tripOwner);
+
+            //then
+            assertThat(trips).isEmpty();
+        }
     }
 }
